@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 """Presentación de marca en video: locución fija (assets/locucion), música fija (assets/musica), placas de paleta y
 tipografías (assets/scenes.js) y una story fija (assets/story.js). Por cliente cambian solo la marca y los textos.
-uso: python3 -I muestra.py <work> <slug> [--tono=calido] [--formato=9:16] [--out=<mp4>] [--solo-hoja]
+uso: python3 -I muestra.py <work> <slug> [--tono=calido] [--estilo=auto|<slug de motion>] [--formato=9:16] [--out=<mp4>] [--solo-hoja]
 <work>/textos.json (lo escribe Claude con textos del cliente, cortos):
   {"rubro":"psicóloga", "nombre":["Jorgelina","Ientilezza"], "frase":["línea 1","línea 2","línea 3"],
-   "titulo":"frase corta para la tipografía de títulos", "cuerpo":"párrafo de 1–2 líneas para la de lectura",
+   "titulo":"frase corta para la tipografía de títulos", "acento":"frase corta para la de acento", "cuerpo":"párrafo de 1–2 líneas para la de lectura",
    "pilares":["pilar 1","pilar 2","pilar 3"]}
 No guarda el look en el historial de la marca (la presentación no cuenta como video publicado).
 """
@@ -49,7 +49,13 @@ def main():
     json.dump(cfg, open(os.path.join(wd, 'config.json'), 'w', encoding='utf-8'), ensure_ascii=False, indent=1)
     if mus:
         run([PY, '-I', f'{MSK}/scripts/beats.py', wd], ok_fail=True)
-    run(['node', f'{MSK}/scripts/look.js', 'new', wd, f'--tono={arg("tono", "calido")}', '--estilo=auto', '--force'])
+    run(['node', f'{MSK}/scripts/look.js', 'new', wd, f'--tono={arg("tono", "calido")}', f'--estilo={arg("estilo", "auto")}', '--force'])
+    acc = jload(os.path.expanduser(f'~/.config/motion/brands/{slug}/brand.json')).get('fonts', {}).get('accent') or {}
+    lf = os.path.join(wd, 'look.json')
+    look = jload(lf)
+    if look.get('kickFont') == 'accent' and not acc.get('italic'):   # acento manuscrito: en un kicker en mayúsculas no se lee
+        look['kickFont'] = 'mono'
+        json.dump(look, open(lf, 'w', encoding='utf-8'), ensure_ascii=False, indent=1)
     run(['node', f'{MSK}/scripts/render.js', wd, '--check', '--at=mid,end'], ok_fail=True)   # la regla de "concept" de motion no aplica acá
     if '--solo-hoja' in sys.argv:
         return

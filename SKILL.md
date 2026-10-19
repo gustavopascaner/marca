@@ -43,16 +43,17 @@ Criterio: que se vea **de ese cliente y no de otro**. Correr `$PY $MSK/scripts/b
 4. Si hay carpeta del cliente: `$PY $MSK/scripts/brand.py remember "<carpeta>" <slug>` (así /motion y /edicion la detectan solas).
 
 ## 4 · Video de presentación de la marca (audio fijo, textos del cliente)
-Todo lo fijo vive en `$MK/assets/` y **no se toca por cliente**: `locucion/` (voz Agustina, ElevenLabs, 47 s: saluda, dice que es la propuesta de identidad visual, pide mirar colores, tipografías y movimiento, y pide feedback; sin nombre del cliente), `musica/` (tema fijo licenciado), `story.js` (8 placas sincronizadas con la locución) y `scenes.js` (placas a medida `paleta` y `tipos`, que muestran los colores con su hex y las tipografías con su nombre).
+Todo lo fijo vive en `$MK/assets/` y **no se toca por cliente**: `locucion/` (voz Agustina, ElevenLabs, 47 s: saluda, dice que es la propuesta de identidad visual, pide mirar colores, tipografías y movimiento, y pide feedback; sin nombre del cliente), `musica/` (tema fijo licenciado), `story.js` (8 placas sincronizadas con la locución) y `scenes.js` (placas a medida `paleta` y `tipos`, que muestran los colores con su hex y las tipografías de títulos, acento y lectura con su nombre).
 Por cliente solo se escribe `<carpeta>/<slug>_MARCA/.work/textos.json`, con textos **sacados de la propuesta de valor** (cortos; nunca cifras, testimonios ni @usuarios inventados):
 ```json
 {"rubro":"<qué hace, 1–3 palabras>", "nombre":["<Nombre>","<Apellido o resto>"],
  "frase":["<idea central>","<en 2–3 líneas>","<la última se resalta>"],
  "titulo":"<frase corta del cliente para mostrar la tipografía de títulos>",
+ "acento":"<frase corta del cliente (2–5 palabras) para mostrar la tipografía de acento>",
  "cuerpo":"<frase del cliente de 1–2 líneas para la de lectura>",
  "pilares":["<pilar 1>","<pilar 2>","<pilar 3>"]}
 ```
-Correr: `python3 -I $MK/scripts/muestra.py "<work>" <slug> --tono=<energico|calido|institucional|humor|sobrio> --out="<carpeta>/<slug>_MARCA/presentacion_<slug>.mp4"` (≈ 1 min: copia lo fijo, look nuevo, hoja, render y mezcla con `mix.py` de motion). El ✗ de "concept" de la dirección de motion **se ignora acá**; el resto se corrige. Con `--solo-hoja` corta antes del video.
+Correr: `python3 -I $MK/scripts/muestra.py "<work>" <slug> --tono=<energico|calido|institucional|humor|sobrio> --out="<carpeta>/<slug>_MARCA/presentacion_<slug>.mp4"` (≈ 1 min: copia lo fijo, look nuevo, hoja, render y mezcla con `mix.py` de motion). `--estilo=<slug>` fija el estilo de /motion (`papel`, `liquido`… en `$MSK/scripts/estilos.js`) cuando el automático no se parece a la referencia del cliente (p. ej. sale oscuro y la marca es de fondo claro). El ✗ de "concept" de la dirección de motion **se ignora acá**; el resto se corrige. Con `--solo-hoja` corta antes del video.
 Mirar `<work>/sheet.jpg`: textos que no entran, colores que se pierden contra el fondo, contraste flojo → corregir textos.json o brand.json y volver a correr. La hoja queda copiada al lado del video (`hoja_<slug>.jpg`).
 Cambiar la locución (solo si Gus lo pide): editar `assets/locucion/script.json`, `$PY $MSK/scripts/tts.py $MK/assets/locucion` y revisar que las palabras que usa `story.js` en `w('…')` sigan estando.
 

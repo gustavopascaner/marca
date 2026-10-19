@@ -11,14 +11,18 @@ SC.paleta=(p,c)=>{const b=c.box;AL(b,p,c,'left');const k=p.kick?kick(b,p.kick):n
   return {r,a:it.at??.3+i*.5};});
  return t=>{if(k)fadeUp(k,t,.05);rows.forEach(({r,a})=>{const q=M.pop(P(t,a,.55));r.style.opacity=P(t,a,.12);r.style.transform=`translateY(${(1-q)*60}px) scaleX(${L(.6,1,E.o3(P(t,a,.5)))})`;r.style.transformOrigin='0 50%';});};};
 
-// SC.tipos: tipografía de títulos (grande, con su nombre) y tipografía de lectura (párrafo de muestra).
-// p={kick, title:'texto en display', body:'párrafo de muestra', atT, atB}
+// SC.tipos: tipografía de títulos (grande, con su nombre), tipografía de acento (frase de muestra) y de lectura (párrafo).
+// p={kick, title:'texto en display', accent:'frase en la de acento', body:'párrafo de muestra', atT, atC, atB}
 SC.tipos=(p,c)=>{const b=c.box;AL(b,p,c,'left');const k=p.kick?kick(b,p.kick):null;const F=BR.fonts||{};
  const lab=(txt,par)=>h('div','font-size:28px;color:var(--sub);margin-bottom:14px',par,txt,'mono');
  const A=h('div','margin-top:30px;width:880px',b);lab(`Títulos · ${(F.display||{}).family||''}`,A);
- const big=h('div','font-size:200px;color:var(--hl);line-height:1',A,'Aa','disp');const tt=h('div','font-size:96px;margin-top:10px',A,p.title||'','disp');
- const ln=h('div','height:4px;width:880px;margin:44px 0;background:color-mix(in srgb,var(--fg) 18%,transparent);transform-origin:0 50%',b);
- const B=h('div','width:880px',b);lab(`Lectura · ${(F.body||{}).family||''}`,B);const bd=h('div','font-size:46px;line-height:1.3',B,p.body||'','body');
- const aT=p.atT??.3,aB=p.atB??aT+1.6;
+ const big=h('div','font-size:170px;color:var(--hl);line-height:1',A,'Aa','disp');const tt=h('div','font-size:88px;margin-top:10px',A,p.title||'','disp');
+ const sep=()=>h('div','height:4px;width:880px;margin:36px 0;background:color-mix(in srgb,var(--fg) 18%,transparent);transform-origin:0 50%',b);
+ const ln1=F.accent?sep():null,C=F.accent?h('div','width:880px',b):null;
+ if(C)lab(`Acento · ${F.accent.family||''}`,C);const ac=C?h('div','font-size:96px;color:var(--hl)',C,p.accent||p.title||'','acc'):null;
+ const ln=sep();
+ const B=h('div','width:880px',b);lab(`Lectura · ${(F.body||{}).family||''}`,B);const bd=h('div','font-size:44px;line-height:1.3',B,p.body||'','body');
+ const aT=p.atT??.3,aB=p.atB??aT+2.4,aC=p.atC??(aT+aB)/2;
  return t=>{if(k)fadeUp(k,t,.05);fadeUp(A.firstChild,t,aT-.1);popIn(big,t,aT,.6);rise(tt,t,aT+.25);
+  if(C){ln1.style.transform=`scaleX(${E.io(P(t,aC-.3,.5))})`;fadeUp(C.firstChild,t,aC-.1);rise(ac,t,aC+.1);}
   ln.style.transform=`scaleX(${E.io(P(t,aB-.3,.5))})`;fadeUp(B.firstChild,t,aB-.1);fadeUp(bd,t,aB+.1);};};
