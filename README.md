@@ -12,7 +12,7 @@ Skill de Claude Code: a partir de la **propuesta de valor** de un cliente crea s
 ```bash
 git clone https://github.com/gustavopascaner/marca ~/.claude/skills/marca
 ```
-**Música:** no viene incluida (es licenciada). Poné un tema instrumental tuyo (`.wav` o `.mp3`) en `assets/musica/`; sin música, el video sale solo con voz.
+**Música:** fija en `assets/musica/` (Warm Acoustic de ereymusic, licenciada en Envato Elements por Gus). Repo privado: no redistribuir.
 
 ## Uso
 En Claude Code: `/marca` + la propuesta de valor (texto o archivo). Opcional: logo, colores o la carpeta del cliente.
@@ -25,3 +25,4 @@ En Claude Code: `/marca` + la propuesta de valor (texto o archivo). Opcional: lo
 | `assets/story.js` | Placas sincronizadas con la locución |
 | `assets/scenes.js` | Placas a medida: `paleta` y `tipos` |
 | `assets/locucion/` | Locución fija (`voice.wav`, `words.json`, guion en `script.json`) |
+| `assets/musica/` | Música fija de fondo |

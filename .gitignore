@@ -1,6 +1,3 @@
-# música licenciada (Envato): no se redistribuye, cada uno pone la suya
-assets/musica/*
-!assets/musica/.gitkeep
 # caché de tts.py
 assets/locucion/voice/
 assets/locucion/timing.json
