@@ -45,7 +45,7 @@ Criterio: que se vea **de ese cliente y no de otro**. Correr `$PY $MSK/scripts/b
 **Fondos de los videos:** predominan los claros (`light`), con `accent` y el `dark` solo eventualmente; los videos nunca van todos oscuros ni con el mismo fondo repetido. Elegir una paleta que funcione bien sobre `light`.
 
 ## 4 · Video de presentación de la marca (audio fijo, textos del cliente)
-Todo lo fijo vive en `$MK/assets/` y **no se toca por cliente**: `locucion/` (voz Agustina, ElevenLabs, 47 s: saluda, dice que es la propuesta de identidad visual, pide mirar colores, tipografías y movimiento, y pide feedback; sin nombre del cliente), `musica/` (tema fijo licenciado), `story.js` (8 placas sincronizadas con la locución) y `scenes.js` (placas a medida `paleta` y `tipos`, que muestran los colores con su hex y las tipografías de títulos y lectura con su nombre).
+Todo lo fijo vive en `$MK/assets/` y **no se toca por cliente**: `locucion/` (voz Agustina, ElevenLabs eleven_v4, 45 s; la anterior en v2 quedó en `locucion_v2_respaldo/`: saluda, dice que es la propuesta de identidad visual, pide mirar colores, tipografías y movimiento, y pide feedback; sin nombre del cliente), `musica/` (tema fijo licenciado), `story.js` (8 placas sincronizadas con la locución) y `scenes.js` (placas a medida `paleta` y `tipos`, que muestran los colores con su hex y las tipografías de títulos y lectura con su nombre).
 Por cliente solo se escribe `<carpeta>/<slug>_MARCA/.work/textos.json`, con textos **sacados de la propuesta de valor** (cortos; nunca cifras, testimonios ni @usuarios inventados):
 ```json
 {"rubro":"<qué hace, 1–3 palabras>", "nombre":["<Nombre>","<Apellido o resto>"],
