@@ -10,7 +10,7 @@ Hablarle a Gus en español rioplatense, corto. **Una sola propuesta, directo** (
 Las marcas viven en `~/.config/motion/brands/<slug>/` y las leen **/motion** (`render.js`, `look.js`) y **/edicion** (`brand.js`): el formato tiene que ser exactamente el de abajo.
 
 ## 0 · Entrada
-- La propuesta de valor (texto o archivo). Opcional: logo, colores, tipografías existentes, carpeta del cliente.
+- La propuesta de valor (texto o archivo). Opcional: logo, colores, tipografías existentes, carpeta del cliente, **audio con la voz del cliente** (para clonarla: ver *Voz del cliente*).
 - **Nombre** del profesional/marca: sacarlo del texto. Si no está, es lo único que se pregunta (una sola vez). `slug` = nombre en minúsculas con guiones, sin tildes. Si `brand.py list` ya tiene ese slug, avisar y preguntar si se pisa o se crea `<slug>-v2`.
 - **Si trae logo o colores: respetarlos.** Logo → `$PY $MSK/scripts/brand.py colors <logo>` y mirarlo (estilo, peso, serif o no); la paleta parte de ahí y solo se completa lo que falte. Tipografías dadas → usarlas (Google Fonts por nombre).
 - Carpeta de trabajo = la del archivo o el directorio actual. Salida: `<carpeta>/<slug>_MARCA/`.
@@ -24,7 +24,7 @@ Criterio: que se vea **de ese cliente y no de otro**. Correr `$PY $MSK/scripts/b
 - **Tipografías** (Google Fonts): `display` (títulos: personalidad), `body` (lectura), `mono` (datos/kicks). **Solo 3 tipografías: no hay tipografía de acento** (ni itálica ni manuscrita; nunca agregar `accent` en `fonts`). Referencia de pares: `$PY $MSK/scripts/brand.py fonts`. Display en mayúsculas (`upper: true`, `leading` 0.9–0.95) para tonos enérgicos/directos; en minúsculas (`upper: false`, `leading` 1.0) para cálidos/serenos/premium.
 - **Estilo**: `shapes` = `blobs` (orgánico) · `rings` · `dots` · `clean`; `grid` true para técnico/datos; `radius` 10–48 (más redondo = más amable); `grain` true.
 - **Subtítulos**: `on: true`, `upper` como el display si es enérgico, `size` 62–68.
-- **Voz**: según quién es la persona de la marca (del texto: "soy psicóloga" → mujer; "soy kinesiólogo" → hombre; si es una empresa o no se sabe, mujer). Guardarla en brand.json como `"voice": {"id": "mujer"}` o `{"id": "hombre"}` (así /motion la usa sin preguntar).
+- **Voz**: según quién es la persona de la marca (del texto: "soy psicóloga" → mujer; "soy kinesiólogo" → hombre; si es una empresa o no se sabe, mujer). Guardarla en brand.json como `"voice": {"id": "mujer"}` o `{"id": "hombre"}` (así /motion la usa sin preguntar). **Si Gus pasó audio del cliente**, después del paso 3 se clona (ver *Voz del cliente*) y esa voz reemplaza a mujer/hombre.
 
 ## 3 · Guardar
 1. `~/.config/motion/brands/<slug>/brand.json` (si hay logo, copiarlo ahí como `logo.png`/`logo.svg` y poner `"logo": "logo.png"`; si no, `null`):
@@ -45,6 +45,7 @@ Criterio: que se vea **de ese cliente y no de otro**. Correr `$PY $MSK/scripts/b
 **Fondos de los videos:** predominan los claros (`light`), con `accent` y el `dark` solo eventualmente; los videos nunca van todos oscuros ni con el mismo fondo repetido. Elegir una paleta que funcione bien sobre `light`.
 
 ## 4 · Video de presentación de la marca (audio fijo, textos del cliente)
+**Si la marca tiene la voz del cliente clonada** (`brand.json → voice.clone`), `muestra.py` genera la locución con esa voz (mismo texto fijo, ≈ 700 caracteres de ElevenLabs): la presentación es la prueba del clon. Sin clon, usa el audio fijo y no gasta.
 Todo lo fijo vive en `$MK/assets/` y **no se toca por cliente**: `locucion/` (voz Agustina, ElevenLabs eleven_v4, 45 s; la anterior en v2 quedó en `locucion_v2_respaldo/`: saluda, dice que es la propuesta de identidad visual, pide mirar colores, tipografías y movimiento, y pide feedback; sin nombre del cliente), `musica/` (tema fijo licenciado), `story.js` (8 placas sincronizadas con la locución) y `scenes.js` (placas a medida `paleta` y `tipos`, que muestran los colores con su hex y las tipografías de títulos y lectura con su nombre).
 Por cliente solo se escribe `<carpeta>/<slug>_MARCA/.work/textos.json`, con textos **sacados de la propuesta de valor** (cortos; nunca cifras, testimonios ni @usuarios inventados):
 ```json
@@ -58,5 +59,14 @@ Correr: `python3 -I $MK/scripts/muestra.py "<work>" <slug> --tono=<energico|cali
 Mirar `<work>/sheet.jpg`: textos que no entran, colores que se pierden contra el fondo, contraste flojo → corregir textos.json o brand.json y volver a correr. La hoja queda copiada al lado del video (`hoja_<slug>.jpg`).
 Cambiar la locución (solo si Gus lo pide): editar `assets/locucion/script.json`, `$PY $MSK/scripts/tts.py $MK/assets/locucion` y revisar que las palabras que usa `story.js` en `w('…')` sigan estando.
 
+## Voz del cliente (clon en ElevenLabs)
+Se usa al crear la marca (si Gus pasó audio) o sola sobre una marca existente: `/marca voz <slug>` + audio (o "cloná la voz de <cliente>").
+1. Antes de subir nada, una sola línea a Gus: confirmar que el cliente autorizó clonar su voz (lo exigen las reglas de ElevenLabs). Es la única pregunta.
+2. Audio: idealmente 1–3 min de la persona sola, sin música ni otras voces (sirven notas de WhatsApp, mp3/wav/m4a o un video). Si hay dudas del material: `python3 -I $MK/scripts/voz.py <slug> <audios…> --solo-preparar` (no gasta) muestra los segundos útiles.
+3. `python3 -I $MK/scripts/voz.py <slug> <audio1> [audio2 …]` → crea el clon (Instant Voice Clone) y lo guarda en `brand.json → voice` con los ajustes de clon (similitud y fuerza del clon 1.0, estabilidad 0, sin `language_code`); el anterior queda en `voice_prev`. Si ya había clon frena: `--reemplazar` crea uno nuevo (el viejo **no** se borra en ElevenLabs; borrarlo solo si Gus lo pide). 401 = la clave necesita el permiso *Voices: Write* (Gus lo agrega en elevenlabs.io → Developers → API Keys).
+4. Re-render de la presentación con la voz nueva: `muestra.py` con el mismo `<work>` y `--out` de antes (si el work ya tenía otro clon, agregar `--cambiar-voz`). Si la marca no tiene work todavía, escribir `textos.json` como en el paso 4. Mandar el MP4 y decir el voice_id.
+5. Desde ahí /motion usa esa voz sola en todos los videos de la marca.
+**/podcast no se toca nunca**: usa siempre la voz de Gus, fija en su propio script; nada de esta sección la cambia.
+
 ## 5 · Entregar
-Mandar el MP4 de presentación con `SendUserFile` y responder corto: nombre y slug, paleta (hex + rol en una línea), tipografías, la idea de la marca en una frase, dónde quedó (`~/.config/motion/brands/<slug>`) y que ya la usan `/motion` y `/edicion`. Si Gus pide cambios: editar brand.json, `brand.py setup`, y re-render de la muestra (no hace falta reescribir story.js).
+Mandar el MP4 de presentación con `SendUserFile` y responder corto: nombre y slug, voz (por defecto o clon + voice_id), paleta (hex + rol en una línea), tipografías, la idea de la marca en una frase, dónde quedó (`~/.config/motion/brands/<slug>`) y que ya la usan `/motion` y `/edicion`. Si Gus pide cambios: editar brand.json, `brand.py setup`, y re-render de la muestra (no hace falta reescribir story.js).

@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 """Presentación de marca en video: locución fija (assets/locucion), música fija (assets/musica), placas de paleta y
 tipografías (assets/scenes.js) y una story fija (assets/story.js). Por cliente cambian solo la marca y los textos.
-uso: python3 -I muestra.py <work> <slug> [--tono=calido] [--estilo=auto|<slug de motion>] [--formato=9:16] [--out=<mp4>] [--solo-hoja]
+uso: python3 -I muestra.py <work> <slug> [--tono=calido] [--estilo=auto|<slug de motion>] [--formato=9:16] [--out=<mp4>] [--solo-hoja] [--cambiar-voz]
+Si la marca tiene la voz del cliente clonada (brand.json → voice.clone), la locución se genera con esa voz (mismo texto);
+si no, se usa el audio fijo. --cambiar-voz: regenerar la locución si el work ya tenía otra voz (p. ej. tras --reemplazar).
 <work>/textos.json (lo escribe Claude con textos del cliente, cortos):
   {"rubro":"psicóloga", "nombre":["Jorgelina","Ientilezza"], "frase":["línea 1","línea 2","línea 3"],
    "titulo":"frase corta para la tipografía de títulos", "cuerpo":"párrafo de 1–2 líneas para la de lectura",
@@ -35,8 +37,16 @@ def main():
     tf = os.path.join(wd, 'textos.json')
     if not os.path.exists(tf):
         sys.exit(f'✗ falta {tf} (ver uso)')
-    for f in ('voice.wav', 'words.json'):
-        shutil.copy(os.path.join(AS, 'locucion', f), os.path.join(wd, f))
+    voz = (jload(os.path.join(os.path.expanduser('~/.config/motion/brands'), slug, 'brand.json')).get('voice') or {})
+    if voz.get('clone'):   # la marca tiene la voz del cliente clonada: la presentación es la prueba del clon (gasta ≈ 700 caracteres)
+        sc = jload(os.path.join(AS, 'locucion', 'script.json'))
+        sc['voice'] = {k: v for k, v in voz.items() if k != 'clone'}
+        json.dump(sc, open(os.path.join(wd, 'script.json'), 'w', encoding='utf-8'), ensure_ascii=False, indent=1)
+        print(f"locución con la voz clonada del cliente: {voz.get('name')}")
+        run([PY, '-I', f'{MSK}/scripts/tts.py', wd] + (['--cambiar-voz'] if '--cambiar-voz' in sys.argv else []))
+    else:   # audio fijo de Agustina (no gasta)
+        for f in ('voice.wav', 'words.json'):
+            shutil.copy(os.path.join(AS, 'locucion', f), os.path.join(wd, f))
     for f in ('story.js', 'scenes.js'):
         shutil.copy(os.path.join(AS, f), os.path.join(wd, f))
     md = os.path.join(AS, 'musica')
