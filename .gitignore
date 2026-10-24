@@ -1,5 +1,2 @@
-# caché de tts.py
-assets/locucion/voice/
-assets/locucion/timing.json
 __pycache__/
 .DS_Store
