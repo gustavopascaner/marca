@@ -1,9 +1,9 @@
 ---
 name: marca
-description: Crea la identidad visual de la marca de un cliente (paleta, tipografías, estilo, subtítulos, voz) a partir de su PROPUESTA DE VALOR, la guarda como brand.json para las skills /motion y /edicion y entrega un video de presentación de la marca para el cliente (locución y música fijas que piden feedback, placas con sus textos, su paleta y sus tipografías). Usar cuando el usuario escribe /marca con un texto o archivo, o pide "armá la marca de este cliente", "identidad visual para…", "marca nueva desde la propuesta de valor".
+description: Crea la identidad visual de la marca de un cliente (paleta, tipografías, estilo, subtítulos, voz) a partir de su PROPUESTA DE VALOR, la guarda como brand.json para las skills /motion y /edicion entrega un video de presentación de la marca para el cliente (locución y música fijas que piden feedback, placas con sus textos, su paleta y sus tipografías) y una landing page estática con la propuesta de valor, que sube a Hostinger por FTP. Usar cuando el usuario escribe /marca con un texto o archivo, o pide "armá la marca de este cliente", "identidad visual para…", "marca nueva desde la propuesta de valor", "la landing / el sitio de <cliente>" (`/marca web <slug>`) o "subí la web de <cliente>" (`/marca subir <slug>`, todas en landing.misterrobot.net/<slug>/).
 ---
 
-# /marca — propuesta de valor → identidad visual + video de muestra
+# /marca — propuesta de valor → identidad visual + video de muestra + landing + publicación
 
 Hablarle a Gus en español rioplatense, corto. **Una sola propuesta, directo** (no ofrecer alternativas): decidir y ejecutar; Gus ajusta después.
 `MSK` = `~/.claude/skills/motion` (motor y `brand.py`). `PY` = `$MSK/.venv/bin/python -I` (si no existe, `python3 -I`). `MK` = `~/.claude/skills/marca`.
@@ -68,5 +68,24 @@ Se usa al crear la marca (si Gus pasó audio) o sola sobre una marca existente: 
 5. Desde ahí /motion usa esa voz sola en todos los videos de la marca.
 **/podcast no se toca nunca**: usa siempre la voz de Gus, fija en su propio script; nada de esta sección la cambia.
 
-## 5 · Entregar
-Mandar el MP4 de presentación con `SendUserFile` y responder corto: nombre y slug, voz (por defecto o clon + voice_id), paleta (hex + rol en una línea), tipografías, la idea de la marca en una frase, dónde quedó (`~/.config/motion/brands/<slug>`) y que ya la usan `/motion` y `/edicion`. Si Gus pide cambios: editar brand.json, `brand.py setup`, y re-render de la muestra (no hace falta reescribir story.js).
+## 5 · Landing page (después del video)
+Una sola página estática que vende la propuesta de valor, con la marca recién creada. También sola sobre una marca existente: `/marca web <slug>` (+ propuesta o material del cliente).
+Plantilla fija (`$MK/assets/web/base.css` + `scripts/landing.py`): colores, tipografías (autoalojadas, sin Google), forma (`shapes`, `radius`, `grid`, `grain`) y mayúsculas salen de brand.json; el script ajusta solo el contraste del resaltado, botones y textos secundarios. Por cliente solo se escribe `<carpeta>/<slug>_MARCA/.work/web.json` (formato completo en el docstring de `landing.py`):
+- **Textos sacados de la propuesta**, voseo y en la voz del cliente (1.ª persona si es un profesional). Recorrido: `hero` (promesa + 1 palabra resaltada con `*así*`) → `dolor` (3 cosas que vive su cliente) → `promesa` → `metodo` (pilares/pasos) → `para_quien` → `sobre` → `faq` → `cierre` (CTA). Todo es opcional menos `hero` y `cierre`: omitir el bloque si la propuesta no lo sostiene antes que rellenar.
+- **Nunca inventar**: cifras, años de experiencia, títulos, testimonios, precios, @usuarios, teléfonos ni direcciones. `contacto` solo con datos que estén en el material; sin WhatsApp ni email los botones van a `#contacto` y el script avisa → pedírselo a Gus en una línea al entregar.
+- Una palabra resaltada por título como mucho; CTA concreto ("Agendá una entrevista", no "Saber más").
+Correr: `python3 -I $MK/scripts/landing.py "<work>/web.json" <slug> --out="<carpeta>/<slug>_MARCA/web" [--foto=<foto del profesional>]`. Si la marca tiene logo va en la barra; con `--foto` aparece en "sobre".
+Mirar `web_desktop.png` y `web_mobile.png` (quedan al lado de `web/`): títulos que se cortan feo, bloques vacíos o muy largos, scroll horizontal (avisa) → corregir web.json y volver a correr.
+La carpeta `web/` (index.html, styles.css, fonts/, img/, favicon.svg) se sube tal cual a cualquier hosting.
+
+## 6 · Publicar en Hostinger (FTP)
+Todas las landings viven en **un solo subdominio compartido**, cada cliente en su carpeta: `https://landing.misterrobot.net/<slug>/`. Solo cuando Gus lo pide (`/marca subir <slug>`, "subí la web de…"): publicar es hacia afuera, así que **antes de cada subida o baja decir la URL y esperar el sí**.
+- **Hosting** (ya configurado, común a todos): `~/.config/motion/hosting.json` (host, usuario, dominio; sin contraseña). Para cambiarlo: `subir.py config --host=… --user=… --dominio=… [--dir=.]`. `dir` = `.` porque la cuenta FTP ya entra en la carpeta del subdominio.
+- **Contraseña**: nunca por el chat ni en archivos. La carga **Gus en su terminal** (bloque `bash` para que lo corra): `python3 -I $MK/scripts/subir.py clave` → Llavero de macOS, servicio `marca-ftp`. Si Gus la pega en el chat, no usarla: pedirle que la cambie en hPanel y la cargue con `clave`.
+- **Publicar / actualizar**: `python3 -I $MK/scripts/subir.py <slug> "<carpeta>/<slug>_MARCA/web"` (la primera vez antes `--prueba`: conecta y muestra qué haría sin tocar nada). Va por FTPS y **sincroniza**: sube solo lo nuevo o cambiado, borra lo que ese cliente ya no usa y nunca toca la carpeta de otro. Las tipografías van a `_fonts/` (una sola copia aunque las usen varios clientes; se borran solas cuando nadie las usa). El registro de qué subió cada cliente está en el servidor (`.landings.json`), así que funciona igual desde cualquier compu. Al final abre la URL y confirma que se ve.
+- `subir.py lista` → clientes publicados con fecha y URL. `subir.py bajar <slug>` → despublica (borra solo lo que subió el script; primero `--prueba` y el OK de Gus).
+- Otra URL que el slug: `--como=<carpeta>`. Si la carpeta ya existe y no la subió el script, o es de otro cliente, frena: `--forzar` solo con el OK de Gus.
+- Errores: "no acepta FTPS" → `--sin-tls` solo si Gus lo autoriza (la contraseña viaja sin cifrar). "Rechazó usuario o contraseña" → revisar la cuenta FTP en hPanel o volver a cargar la clave. "No muestra la versión nueva" → caché: esperar o purgar en hPanel. Sin SSL → hPanel → Seguridad → SSL. **Error 525** = misterrobot.net pasa por Cloudflare y Hostinger no tiene certificado para ese subdominio: instalarlo en hPanel → Seguridad → SSL (si falla, poner el registro en Cloudflare como "DNS only", emitir y volver a activar el proxy).
+
+## 7 · Entregar
+Mandar el MP4 de presentación y `web_desktop.png` con `SendUserFile` y responder corto: nombre y slug, voz (por defecto o clon + voice_id), paleta (hex + rol en una línea), tipografías, la idea de la marca en una frase, dónde quedó (`~/.config/motion/brands/<slug>`, la landing en `<slug>_MARCA/web/`), qué falta para publicarla (contacto, foto; si ya se subió, la URL) y que la marca ya la usan `/motion` y `/edicion`. Si Gus pide cambios: editar brand.json, `brand.py setup`, y re-render de la muestra y la landing (no hace falta reescribir story.js).
