@@ -14,6 +14,12 @@ git clone https://github.com/gustavopascaner/marca ~/.claude/skills/marca
 ```
 **Música:** fija en `assets/musica/` (Warm Acoustic de ereymusic, licenciada en Envato Elements por Gus). Repo privado: no redistribuir.
 
+## Publicar landings (una vez por compu)
+```bash
+python3 -I ~/.claude/skills/marca/scripts/subir.py clave
+```
+Pide la contraseña de la cuenta FTP de landing.misterrobot.net y la guarda en el Llavero de macOS.
+
 ## Uso
 En Claude Code: `/marca` + la propuesta de valor (texto o archivo). Opcional: logo, colores o la carpeta del cliente.
 
@@ -23,8 +29,9 @@ En Claude Code: `/marca` + la propuesta de valor (texto o archivo). Opcional: lo
 | `SKILL.md` | Instrucciones de la skill |
 | `scripts/muestra.py` | Arma y renderiza el video de presentación |
 | `scripts/landing.py` | Arma la landing estática (`web/`) desde brand.json + `web.json` |
-| `scripts/subir.py` | Publica cada landing en `<subdominio>/<slug>/` por FTPS, sincronizando (datos en `~/.config/motion/hosting.json`, contraseña en el Llavero) |
+| `scripts/subir.py` | Publica cada landing en `<subdominio>/<slug>/` por FTPS, sincronizando (datos en `assets/hosting.json`, contraseña en el Llavero de cada compu) |
 | `scripts/captura.js` | Capturas desktop/mobile de la landing para revisarla |
+| `assets/hosting.json` | Hosting común de las landings (sin contraseña) |
 | `assets/web/base.css` | Plantilla fija de la landing |
 | `assets/story.js` | Placas sincronizadas con la locución |
 | `assets/scenes.js` | Placas a medida: `paleta` y `tipos` |

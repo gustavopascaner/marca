@@ -7,7 +7,8 @@ se borran solas cuando ningún cliente las usa. El estado vive en el servidor, e
 
 uso:
   python3 -I subir.py config --host=ftp.dominio.com --user=u123.claude --dominio=landing.dominio.com [--dir=.] [--puerto=21]
-      → guarda los datos del hosting (sin contraseña) en ~/.config/motion/hosting.json
+      → guarda los datos del hosting (sin contraseña) en ~/.config/motion/hosting.json, que pisa a assets/hosting.json
+        (el del repo, común a todos los que usan la skill) solo en esta compu
   python3 -I subir.py clave
       → pide la contraseña FTP en la terminal y la guarda en el Llavero de macOS; la corre Gus, nunca Claude
   python3 -I subir.py <slug> <carpeta web> [--como=<carpeta remota>] [--prueba] [--forzar]
@@ -20,7 +21,9 @@ La contraseña también puede venir de MARCA_FTP_PASS. --sin-tls: FTP sin cifrar
 import ftplib, hashlib, io, json, os, posixpath, re, ssl, subprocess, sys, urllib.error, urllib.request
 from datetime import datetime
 
-CONF = os.environ.get('MARCA_HOSTING', os.path.expanduser('~/.config/motion/hosting.json'))
+MK = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..'))
+BASE = os.path.join(MK, 'assets', 'hosting.json')   # el hosting común, en el repo (sin contraseña)
+CONF = os.environ.get('MARCA_HOSTING', os.path.expanduser('~/.config/motion/hosting.json'))   # opcional: pisa lo del repo en esta compu
 KC = 'marca-ftp'   # servicio en el Llavero
 MAN = '.landings.json'
 FONTS = '_fonts'
@@ -37,9 +40,13 @@ HASHED = re.compile(r'-[0-9a-f]{10}\.\w+$')
 
 
 def conf():
-    if not os.path.exists(CONF):
+    w = {}
+    for p in ([] if 'MARCA_HOSTING' in os.environ else [BASE]) + [CONF]:
+        if os.path.exists(p):
+            w.update(json.load(open(p, encoding='utf-8')))
+    if not w.get('host') or not w.get('user') or not w.get('dominio'):
         sys.exit(f'✗ falta configurar el hosting: python3 -I {os.path.abspath(__file__)} config --host=… --user=… --dominio=…')
-    return json.load(open(CONF, encoding='utf-8'))
+    return w
 
 
 def cuenta(w):
