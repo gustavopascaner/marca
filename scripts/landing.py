@@ -101,19 +101,8 @@ def fonts(b, bd, out):
     return '\n'.join(css)
 
 
-def main():
-    if len(sys.argv) < 3 or not arg('out'):
-        sys.exit(__doc__)
-    w, slug, out = jload(sys.argv[1]), sys.argv[2], os.path.abspath(arg('out'))
-    bd = os.path.join(BRANDS, slug)
-    b = jload(os.path.join(bd, 'brand.json'))
+def tema(b, bd, out):   # @font-face (copia las fuentes a out/fonts) + variables :root con contraste asegurado; lo usa también pdf.py
     c, st, F = b['colors'], b.get('style') or {}, b['fonts']
-    os.makedirs(out, exist_ok=True)
-    for x in ('hero', 'cierre'):
-        if not w.get(x):
-            sys.exit(f'✗ web.json necesita "{x}"')
-
-    # colores derivados con contraste asegurado
     on_acc = c['dark'] if cr(c['accent'], c['dark']) >= cr(c['accent'], c['light']) else c['light']
     if cr(c['accent'], on_acc) < 3:
         avisos.append(f'⚠️  accent {c["accent"]} con texto {on_acc}: contraste {cr(c["accent"], on_acc):.1f} < 3 (botones)')
@@ -135,19 +124,40 @@ def main():
     have = {int(fi.get('weight', 400)) for fi in F['body'].get('files', [])}
     if have and min(int(F['body'].get('weight', 400)), 500) not in have:
         root = root.replace(f"--w-body:{min(int(F['body'].get('weight', 400)), 500)}", f"--w-body:{min(have)}")
-    css = fonts(b, bd, out) + '\n' + root + '\n' + open(os.path.join(MK, 'assets', 'web', 'base.css'), encoding='utf-8').read()
+    return fonts(b, bd, out) + '\n' + root, on_acc
+
+
+def destino(k, mensaje=None):   # contacto → link de los botones (WhatsApp con mensaje precargado, si no email, si no web); None si no hay nada
+    wa = re.sub(r'\D', '', k.get('whatsapp', ''))
+    mensaje = mensaje or k.get('mensaje')
+    if wa:
+        return f'https://wa.me/{wa}' + (f'?text={urllib.parse.quote(mensaje)}' if mensaje else '')
+    if k.get('email'):
+        return f'mailto:{k["email"]}'
+    return k.get('web') or None
+
+
+def main():
+    if len(sys.argv) < 3 or not arg('out'):
+        sys.exit(__doc__)
+    w, slug, out = jload(sys.argv[1]), sys.argv[2], os.path.abspath(arg('out'))
+    bd = os.path.join(BRANDS, slug)
+    b = jload(os.path.join(bd, 'brand.json'))
+    c, st = b['colors'], b.get('style') or {}
+    radius = int(st.get('radius', 24))
+    os.makedirs(out, exist_ok=True)
+    for x in ('hero', 'cierre'):
+        if not w.get(x):
+            sys.exit(f'✗ web.json necesita "{x}"')
+    css, on_acc = tema(b, bd, out)
+    css += '\n' + open(os.path.join(MK, 'assets', 'web', 'base.css'), encoding='utf-8').read()
     open(os.path.join(out, 'styles.css'), 'w', encoding='utf-8').write(css)
 
     # contacto → destino de los botones
     k = w.get('contacto') or {}
     wa = re.sub(r'\D', '', k.get('whatsapp', ''))
-    if wa:
-        href = f'https://wa.me/{wa}' + (f'?text={urllib.parse.quote(k["mensaje"])}' if k.get('mensaje') else '')
-    elif k.get('email'):
-        href = f'mailto:{k["email"]}'
-    elif k.get('web'):
-        href = k['web']
-    else:
+    href = destino(k)
+    if not href:
         href = '#contacto'
         avisos.append('⚠️  sin WhatsApp ni email: los botones apuntan a #contacto (pedirle a Gus el dato y volver a correr)')
     ext = ' target="_blank" rel="noopener"' if href.startswith('http') else ''
@@ -266,4 +276,5 @@ els.forEach(e=>io.observe(e))}})();
     print('\n'.join(avisos))
 
 
-main()
+if __name__ == '__main__':
+    main()
