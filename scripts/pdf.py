@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""PDF de presentación de la marca: la misma propuesta que la landing, en placas 16:9 (una sección por placa), con su marca.
+"""PDF de presentación de la marca: la misma propuesta que la landing, en placas verticales 9:16 para leer en el celular (una sección por placa), con su marca y sin texturas (igual que la web).
 uso: python3 -I pdf.py <web.json> <slug> --out=<archivo.pdf> [--foto=<imagen>] [--url=<web del cliente>] [--sin-url]
 Lee el mismo web.json que landing.py (ver su docstring). Para el PDF suma, opcional, en "contacto":
   "mensaje_pdf":"Hola …, vi tu presentación y …"   → texto precargado del WhatsApp que sale del PDF (sin él usa "mensaje" y avisa)
@@ -7,7 +7,7 @@ CTA en la última placa: botón con link (wa.me + mensaje_pdf; si no hay WhatsAp
 en el pie de cada placa el contacto con link y, en la última, la URL de la landing (landing.misterrobot.net/<slug>/ o --url).
 Sale <archivo.pdf> y al lado la hoja para revisar (<archivo>.jpg). Fuentes incrustadas; los links quedan clickeables (se verifica).
 """
-import html, json, os, random, re, struct, subprocess, sys, zlib
+import html, os, re, subprocess, sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import landing as L   # noqa: E402  (mismos colores, tipografías y helpers que la web)
@@ -15,14 +15,6 @@ import qr             # noqa: E402
 
 MK, t, paras, kick, arg = L.MK, L.t, L.paras, L.kick, L.arg
 avisos = L.avisos
-
-
-def grain_png(path, n=160):   # textura de grano como imagen (un filtro SVG en un PDF rasteriza la página entera)
-    rnd = random.Random(7)
-    rows = b''.join(b'\0' + bytes(v for _ in range(n) for v in (0, 0, 0, rnd.randint(0, 46))) for _ in range(n))
-    ch = lambda k, d: struct.pack('>I', len(d)) + k + d + struct.pack('>I', zlib.crc32(k + d) & 0xffffffff)
-    open(path, 'wb').write(b'\x89PNG\r\n\x1a\n' + ch(b'IHDR', struct.pack('>IIBBBBB', n, n, 8, 6, 0, 0, 0))
-                           + ch(b'IDAT', zlib.compress(rows, 9)) + ch(b'IEND', b''))
 
 
 def landing_url(slug):
@@ -46,11 +38,7 @@ def main():
     work = os.path.join(os.path.dirname(os.path.abspath(sys.argv[1])), 'pdf')
     os.makedirs(os.path.join(work, 'img'), exist_ok=True)
     css, _ = L.tema(b, bd, work)
-    grain = ''
-    if st.get('grain'):
-        grain_png(os.path.join(work, 'img', 'grain.png'))
-        grain = ':root{--grain:url(img/grain.png)}'
-    css += '\n' + grain + '\n' + open(os.path.join(MK, 'assets', 'web', 'pdf.css'), encoding='utf-8').read()
+    css += '\n' + open(os.path.join(MK, 'assets', 'web', 'pdf.css'), encoding='utf-8').read()
     open(os.path.join(work, 'styles.css'), 'w', encoding='utf-8').write(css)
 
     # CTA: el mismo destino que la web, con mensaje propio del PDF
@@ -101,10 +89,9 @@ def main():
     if w.get('metodo'):
         x = w['metodo']
         pasos = x.get('pasos', [])
-        n = len(pasos) if len(pasos) <= 4 else 3
         S.append(('s-tint', f'{kick(x.get("kicker"))}<h2>{t(x["titulo"])}</h2>'
                   + (f'<p class="lead">{t(x["bajada"])}</p>' if x.get('bajada') else '')
-                  + f'<div class="steps" style="--n:{n}">' + ''.join(f'<article class="step"><span class="n">{i + 1:02d}</span><h3>{t(p["titulo"])}</h3><p>{t(p.get("texto"))}</p></article>'
+                  + '<div class="steps">' + ''.join(f'<article class="step"><span class="n">{i + 1:02d}</span><h3>{t(p["titulo"])}</h3><p>{t(p.get("texto"))}</p></article>'
                                                              for i, p in enumerate(pasos)) + '</div>'))
     if w.get('para_quien'):
         x = w['para_quien']

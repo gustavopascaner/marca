@@ -10,7 +10,7 @@ const {CHROME,fileURL}=require(path.join(MSK,'scripts','platform.js'));
   const br=await puppeteer.launch({executablePath:CHROME,headless:'new',args:['--allow-file-access-from-files']});
   try{
     const p=await br.newPage();
-    await p.setViewport({width:1280,height:720});
+    await p.setViewport({width:1080,height:1920});
     await p.goto(fileURL(path.join(dir,'index.html')),{waitUntil:'networkidle0'});
     await p.evaluate(()=>document.fonts.ready);
     // placas donde algo se sale del cuadro
@@ -25,7 +25,7 @@ const {CHROME,fileURL}=require(path.join(MSK,'scripts','platform.js'));
     const fonts=await p.evaluate(()=>[...document.fonts].filter(f=>f.status==='error').map(f=>f.family));
     if(fonts.length)console.log('⚠️  tipografías que no cargaron:',[...new Set(fonts)].join(', '));
     await p.evaluate(()=>document.body.classList.add('hoja'));
-    await p.setViewport({width:1280*2+120,height:720,deviceScaleFactor:.5});
+    await p.setViewport({width:1080*4+60*5,height:1920,deviceScaleFactor:.3});
     const jpg=out.replace(/\.pdf$/i,'')+'.jpg';
     await p.screenshot({path:jpg,fullPage:true,type:'jpeg',quality:82});
     console.log('✓ hoja:',jpg);
