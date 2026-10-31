@@ -11,7 +11,7 @@ Las marcas viven en `~/.config/motion/brands/<slug>/` y las leen **/motion** (`r
 
 ## 0 · Entrada
 - La propuesta de valor (texto o archivo). Opcional: logo, colores, tipografías existentes, carpeta del cliente, **audio con la voz del cliente** (para clonarla: ver *Voz del cliente*).
-- **Nombre** del profesional/marca: sacarlo del texto. Si no está, es lo único que se pregunta (una sola vez). `slug` = nombre en minúsculas con guiones, sin tildes. Si `brand.py list` ya tiene ese slug, avisar y preguntar si se pisa o se crea `<slug>-v2`.
+- **Nombre** del profesional/marca: sacarlo del texto. Si no está, es lo único que se pregunta (una sola vez). `slug` = **siempre `nombre-apellido`** del profesional (primer nombre + primer apellido), en minúsculas, sin tildes ni ñ (`n`), sin títulos (Dr., Dra., Lic.) ni nombre de consultorio/marca: "Dra. María Laura Gómez Pérez" → `maria-gomez`. Es también la carpeta y la URL (`landing.misterrobot.net/<slug>/`). Si el texto no trae apellido, preguntarlo. Si `brand.py list` ya tiene ese slug, avisar y preguntar si se pisa o se crea `<slug>-v2`.
 - **Si trae logo o colores: respetarlos.** Logo → `$PY $MSK/scripts/brand.py colors <logo>` y mirarlo (estilo, peso, serif o no); la paleta parte de ahí y solo se completa lo que falte. Tipografías dadas → usarlas (Google Fonts por nombre).
 - Carpeta de trabajo = la del archivo o el directorio actual. Salida: `<carpeta>/<slug>_MARCA/`.
 
